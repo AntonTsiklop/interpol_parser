@@ -25,7 +25,7 @@ class NoticeParser:
         self.num_of_res = 0             # кол-во результатов
 
     @staticmethod
-    def json_write(data_list, filename):
+    def json_write(data_list, filename: str):
         with open(f'{filename}.json', 'a') as f:
             f.write('[\n')
             for el in data_list[:-1]:
@@ -45,14 +45,14 @@ class NoticeParser:
         data = query['_embedded']['notices']        # словарь, в котором лежит информация об объекте
         return data, total
 
-    def save_images(self, data):
+    def save_images(self, data, image_dir: str):
         for el in data:
             try:
                 image_request = requests.get(el['_links']['thumbnail']['href']) # тут лежит миниатюра, но она есть
-                if not os.path.exists('images'):                                # не в каждой записи
-                    os.mkdir('images')
+                if not os.path.exists(f'{image_dir}'):                                # не в каждой записи
+                    os.mkdir(f'{image_dir}')
                 entity_id = el['entity_id'].replace('/', '-')                   # id объекта
-                out = open(f"images/{entity_id}.jpg", "wb")
+                out = open(f"{image_dir}/{entity_id}.jpg", "wb")
                 out.write(image_request.content)
                 out.close()
             except KeyError:
@@ -60,7 +60,7 @@ class NoticeParser:
             detail_request = requests.get(el['_links']['self']['href'])         # тут лежит подробная информация
             self.data_list_detail.append(detail_request.json())                 # об объекте
 
-    def parse_notices(self, filename):
+    def parse_notices(self, filename: str):
         for char_name in ascii_uppercase:
             for char_forename in ascii_uppercase:
                 data, total = self.query(char_name, char_forename)
@@ -105,7 +105,7 @@ class NoticeParser:
         self.json_write(self.data_list, f'{filename_notices}')
         self.json_write(self.data_list_detail, f'{filename_notices_details}')
 
-    def parse_details_with_thumbnails(self, filename_notices: str, filename_notices_details: str):
+    def parse_details_with_thumbnails(self, filename_notices: str, filename_notices_details: str, image_dir: str):
         for char_name in ascii_uppercase:
             for char_forename in ascii_uppercase:
                 data, total = self.query(char_name, char_forename)
@@ -117,12 +117,12 @@ class NoticeParser:
                         if total == 0:
                             continue
                         self.num_of_res += total
-                        self.save_images(data)
+                        self.save_images(data, image_dir)
                         self.data_list.append(data)
                     continue
                 self.num_of_res += total
                 print(f'Found {self.num_of_res} notices')
-                self.save_images(data)
+                self.save_images(data, image_dir)
                 self.data_list.append(data)
         self.json_write(self.data_list, f'{filename_notices}')
         self.json_write(self.data_list_detail, f'{filename_notices_details}')
@@ -131,4 +131,6 @@ class NoticeParser:
 red_notices = NoticeParser('https://ws-public.interpol.int/notices/v1/red')
 # red_notices.parse_notices('results')
 # red_notices.parse_details('results', 'results_details')
-red_notices.parse_details_with_thumbnails('results', 'results_details')
+red_notices.parse_details_with_thumbnails('results', 'results_details', 'images')
+yellow_notices = NoticeParser('https://ws-public.interpol.int/notices/v1/yellow')
+yellow_notices.parse_details_with_thumbnails('results_y', 'results_details_y', 'images')
