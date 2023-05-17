@@ -75,6 +75,9 @@ class NoticesParser:
                 self.num_of_res += total
                 print(f'Found {self.num_of_res} notices')
                 self.data_list.append(data)
+                if self.num_of_res > 100:
+                    break
+            break
         return self.data_list
 
 
@@ -86,7 +89,7 @@ class NoticeDetailsParser(NoticesParser):
 
     def parse_details(self, data_list: list):
         if not data_list:
-            self.data_list = super().parse_notices()
+            self.data_list = self.parse_notices()
         else:
             self.data_list = data_list
         for data in self.data_list:
@@ -100,7 +103,7 @@ class NoticesThumbnailsParser(NoticesParser):
 
     def parse_thumbnails(self, image_dir: str, data_list: list):
         if not data_list:
-            self.data_list = super().parse_notices()
+            self.data_list = self.parse_notices()
         else:
             self.data_list = data_list
         for data in self.data_list:
