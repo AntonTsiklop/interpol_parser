@@ -21,6 +21,7 @@ class NoticesParser:
     def __init__(self, link: str):
         self.link = link
         self.data_list = []             # информация об объектах
+        self.data_list_detail = []      # подробная информация об объектах
         self.num_of_res = 0             # кол-во результатов
 
     @staticmethod
@@ -80,33 +81,25 @@ class NoticesParser:
             break
         return self.data_list
 
-
-class NoticeDetailsParser(NoticesParser):
-
-    def __init__(self, link: str):
-        super().__init__(link)
-        self.data_list_detail = []  # подробная информация об объектах
-
-    def parse_details(self, data_list: list):
-        if not data_list:
+    def parse_details(self):
+        if not self.data_list:
             self.data_list = self.parse_notices()
-        else:
-            self.data_list = data_list
         for data in self.data_list:
             for el in data:
                 detail_request = requests.get(el['_links']['self']['href'])
                 self.data_list_detail.append(detail_request.json())
         return self.data_list_detail
 
-
-class NoticesThumbnailsParser(NoticesParser):
-
     def parse_thumbnails(self, image_dir: str, data_list: list):
         if not data_list:
             self.data_list = self.parse_notices()
-        else:
-            self.data_list = data_list
         for data in self.data_list:
             self.save_images(data, image_dir)
 
 
+red_notices = NoticesParser('https://ws-public.interpol.int/notices/v1/red')
+red_notices_list = red_notices.parse_notices()
+red_notices.json_write(red_notices_list, 'red_notices')
+red_notices_details_list = red_notices.parse_details()
+red_notices.json_write(red_notices_details_list, 'red_notices_details')
+red_notices.parse_thumbnails('images_red', red_notices_list)
