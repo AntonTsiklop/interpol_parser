@@ -2,9 +2,9 @@
 Данные получены с помощью Interpol Notices API https://interpol.api.bund.dev.
 Перебор по фамилиям A-Z + перебор по именам A-Z, если запрос включает более 160 элементов,
 то добавляется фильтр по возрасту: 18-30, 30-40, 40-50, 50-70, 70-90, 90-110.
-Класс NoticesParser служит для получения данных со страниц, классы NoticesDetailsParser
-и NoticesThumbnailsParser расширяют функционал класса NoticeParser для получения подробной
-информации об объектах и миниатюр.
+Метод parse_notices возвращает список с информацией со страниц, метод parse details
+возвращает список с подробной информацией об объектах, метод parse_thumbnails сохраняет
+миниатюры в указанную папку, остальные методы спомогательные, функционал понятен из названия.
 """
 
 from string import ascii_uppercase
@@ -25,7 +25,7 @@ class NoticesParser:
         self.num_of_res = 0             # кол-во результатов
 
     @staticmethod
-    def json_write(data_list, filename: str):
+    def json_write(data_list: list, filename: str):
         with open(f'{filename}.json', 'a') as f:
             f.write('[\n')
             for el in data_list[:-1]:
@@ -37,7 +37,7 @@ class NoticesParser:
             f.close()
 
     @staticmethod
-    def save_images(data, image_dir: str):
+    def save_images(data: list, image_dir: str):
         for el in data:
             try:
                 image_request = requests.get(el['_links']['thumbnail']['href']) # тут лежит миниатюра, но она есть
