@@ -76,9 +76,6 @@ class NoticesParser:
                 self.num_of_res += total
                 print(f'Found {self.num_of_res} notices')
                 self.data_list.append(data)
-                if self.num_of_res > 100:
-                    break
-            break
         return self.data_list
 
     def parse_details(self):
